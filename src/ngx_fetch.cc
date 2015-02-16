@@ -858,6 +858,7 @@ bool NgxFetch::HandleHeader(ngx_connection_t* c) {
   if (n > size) {
     return false;
   } else if (fetch->parser_.headers_complete()) {
+    fetch->set_response_handler(NgxFetch::HandleBody);
     if (fetch->async_fetch_->response_headers()->FindContentLength(
             &fetch->content_length_)) {
       if (fetch->content_length_ < 0) {
@@ -879,7 +880,6 @@ bool NgxFetch::HandleHeader(ngx_connection_t* c) {
     }
 
     fetch->in_->pos += n;
-    fetch->set_response_handler(NgxFetch::HandleBody);
     if ((fetch->in_->last - fetch->in_->pos) > 0) {
       return fetch->response_handler(c);
     }
