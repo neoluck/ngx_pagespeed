@@ -40,7 +40,7 @@ http {
   pagespeed MessageBufferSize 200000;
   # Increase the default fetcher timeout to resolve sporadic flakeyness when
   # the native fetcher uses 8.8.8.8 to resolve.
-  pagespeed FetcherTimeoutMs 10000;
+  pagespeed FetcherTimeoutMs 30000;
   pagespeed NativeFetcherMaxKeepaliveRequests 50;
 
   root "@@SERVER_ROOT@@";
@@ -1158,6 +1158,29 @@ http {
     server_name proxy-post-origin.example.com;
     pagespeed FileCachePath "@@FILE_CACHE@@";
     root "@@SERVER_ROOT@@";
+  }
+
+  server {
+    pagespeed on;
+    listen @@SECONDARY_PORT@@;
+    listen [::]:@@SECONDARY_PORT@@;
+    server_name stress.example.com;
+    pagespeed FileCachePath "@@FILE_CACHE@@";
+    pagespeed RewriteLevel PassThrough;
+    root "@@TEST_TMP@@/../www/";
+    pagespeed RewriteDeadlinePerFlushMs 1;
+    pagespeed InPlaceResourceOptimization off;
+    pagespeed FlushHtml on;
+
+    location ~ \.php$ {
+      fastcgi_param SCRIPT_FILENAME $request_filename;
+      fastcgi_param QUERY_STRING $query_string;
+      fastcgi_param REQUEST_METHOD $request_method;
+      fastcgi_param CONTENT_TYPE $content_type;
+      fastcgi_param CONTENT_LENGTH $content_length;
+      fastcgi_pass 127.0.0.1:9000;
+      fastcgi_buffering off;
+    }
   }
 
   server {

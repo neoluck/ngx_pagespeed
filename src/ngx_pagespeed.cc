@@ -181,6 +181,7 @@ ngx_int_t string_piece_to_buffer_chain(
       return NGX_ERROR;
     }
 
+    b->flush = 1;
     cl->buf = b;
     cl->next = NULL;
 
